@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/onunkwor/flypro-backend/internal/config"
-	"github.com/onunkwor/flypro-backend/internal/handlers"
+	"github.com/onunkwor/flypro-backend/internal/routes"
 )
 
 func init() {
@@ -17,7 +17,7 @@ func init() {
 }
 func main() {
 	router := gin.Default()
-	handlers.RegisterUserRoutes(router)
+	routes.RegisterUserRoutes(router)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
