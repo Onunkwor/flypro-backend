@@ -1,4 +1,4 @@
-DB_URL=postgres://postgres:adminpassword@localhost:5431/travel-db?sslmode=disable
+DB_URL=$(shell grep DB_URL .env | cut -d '=' -f2-)
 MIGRATIONS_DIR=./migrations
 
 migrate-up:
