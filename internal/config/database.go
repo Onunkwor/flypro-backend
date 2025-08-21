@@ -20,5 +20,6 @@ func ConnectDatabase() error {
 	if err != nil {
 		return err
 	}
+	log.Println("Database connection established successfully")
 	return nil
 }

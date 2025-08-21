@@ -1,1 +1,39 @@
+# Binaries
+/bin/
+/*.exe
+/*.exe~
+/*.dll
+/*.so
+/*.dylib
+
+# Build output
+*.out
+
+# Go build cache & test binary
+*.test
+*.coverprofile
+*.prof
+*.pprof
+
+# Dependency directories
+/vendor/
+
+# Air live reload
+tmp/
+.air
+.air.toml
+
+# Environment files
 .env
+.env.*
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+
+# Docker
+*.log
+docker-data/
