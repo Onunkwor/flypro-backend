@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
+	ErrUserNotFound       = errors.New("user not found")
 )
 
 type UserService struct {
@@ -27,5 +28,9 @@ func (s *UserService) CreateUser(user *models.User) error {
 }
 
 func (s *UserService) GetUserByID(id uint) (*models.User, error) {
-	return s.repo.GetUserByID(id)
+	user, err := s.repo.GetUserByID(id)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+	return user, nil
 }
