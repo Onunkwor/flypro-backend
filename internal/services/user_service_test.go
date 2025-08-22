@@ -1,8 +1,10 @@
 package services_test
 
 import (
+	"context"
 	"testing"
 
+	"github.com/onunkwor/flypro-backend/internal/config"
 	"github.com/onunkwor/flypro-backend/internal/models"
 	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/repository/mocks"
@@ -12,7 +14,7 @@ import (
 
 func TestCreateUser_EmailAlreadyExists(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepo)
-	svc := services.NewUserService(mockRepo)
+	svc := services.NewUserService(config.Redis, mockRepo)
 
 	existingUser := &models.User{Email: "test@example.com"}
 
@@ -27,7 +29,7 @@ func TestCreateUser_EmailAlreadyExists(t *testing.T) {
 
 func TestCreateUser_Success(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepo)
-	svc := services.NewUserService(mockRepo)
+	svc := services.NewUserService(config.Redis, mockRepo)
 
 	newUser := &models.User{Email: "cake@gmail.com"}
 
@@ -44,12 +46,12 @@ func TestCreateUser_Success(t *testing.T) {
 
 func TestGetUserByID_NotFound(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepo)
-	svc := services.NewUserService(mockRepo)
+	svc := services.NewUserService(config.Redis, mockRepo)
 	userID := uint(2)
 
 	mockRepo.On("GetUserByID", userID).Return(nil, repository.ErrUserNotFound)
 
-	user, err := svc.GetUserByID(userID)
+	user, err := svc.GetUserByID(context.Background(), userID)
 
 	assert.Error(t, err)
 	assert.Nil(t, user)
@@ -59,12 +61,12 @@ func TestGetUserByID_NotFound(t *testing.T) {
 
 func TestGetUserByID_Success(t *testing.T) {
 	mockRepo := new(mocks.MockUserRepo)
-	svc := services.NewUserService(mockRepo)
+	svc := services.NewUserService(config.Redis, mockRepo)
 	userID := uint(3)
 	expectedUser := &models.User{ID: userID, Email: "cake@gmail.com"}
 	mockRepo.On("GetUserByID", userID).Return(expectedUser, nil)
 
-	user, err := svc.GetUserByID(userID)
+	user, err := svc.GetUserByID(context.Background(), userID)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedUser, user)
 	mockRepo.AssertExpectations(t)

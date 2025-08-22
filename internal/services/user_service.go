@@ -1,8 +1,13 @@
 package services
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/onunkwor/flypro-backend/internal/models"
 	"github.com/onunkwor/flypro-backend/internal/repository"
 	"gorm.io/gorm"
@@ -13,11 +18,12 @@ var (
 )
 
 type UserService struct {
-	repo repository.UserRepository
+	repo  repository.UserRepository
+	redis *redis.Client
 }
 
-func NewUserService(repo repository.UserRepository) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(r *redis.Client, repo repository.UserRepository) *UserService {
+	return &UserService{redis: r, repo: repo}
 }
 
 func (s *UserService) CreateUser(user *models.User) error {
@@ -32,11 +38,21 @@ func (s *UserService) CreateUser(user *models.User) error {
 	return s.repo.CreateUser(user)
 }
 
-func (s *UserService) GetUserByID(id uint) (*models.User, error) {
+func (s *UserService) GetUserByID(ctx context.Context, id uint) (*models.User, error) {
+	key := fmt.Sprintf("user:%d", id)
+	val, err := s.redis.Get(ctx, key).Result()
+	if err == nil {
+		var user models.User
+		if err := json.Unmarshal([]byte(val), &user); err == nil {
+			return &user, nil
+		}
+	}
 	user, err := s.repo.GetUserByID(id)
 	if err != nil {
 		return nil, err
 	}
+	bytes, _ := json.Marshal(user)
+	s.redis.Set(ctx, key, bytes, time.Hour)
 	return user, nil
 
 }

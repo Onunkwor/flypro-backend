@@ -10,7 +10,7 @@ import (
 
 func RegisterExpenseRoutes(router *gin.Engine) {
 	repo := repository.NewExpenseRepository(config.DB)
-	svc := services.NewExpenseService(repo)
+	svc := services.NewExpenseService(repo, config.Redis)
 	handler := handlers.NewExpenseHandler(svc)
 
 	expenses := router.Group("/api/expenses")

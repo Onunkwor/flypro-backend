@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -45,7 +46,6 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"expense": expense})
 }
 
-// GET /api/expenses/:id
 func (h *ExpenseHandler) GetExpenseByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -67,7 +67,6 @@ func (h *ExpenseHandler) GetExpenseByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"expense": expense})
 }
 
-// PUT /api/expenses/:id
 func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -100,7 +99,6 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"expense": expense})
 }
 
-// DELETE /api/expenses/:id
 func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -121,7 +119,6 @@ func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "expense deleted successfully"})
 }
 
-// GET /api/expenses
 func (h *ExpenseHandler) ListExpenses(c *gin.Context) {
 	// optional filters
 	filters := make(map[string]interface{})
@@ -135,7 +132,7 @@ func (h *ExpenseHandler) ListExpenses(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
-	expenses, err := h.svc.ListExpenses(filters, offset, limit)
+	expenses, err := h.svc.ListExpenses(filters, offset, limit, context.Background())
 	if err != nil {
 		utils.InternalServerErrorResponse(c, err)
 		return

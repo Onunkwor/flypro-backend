@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/onunkwor/flypro-backend/internal/config"
 	"github.com/onunkwor/flypro-backend/internal/models"
 	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/repository/mocks"
@@ -13,7 +14,7 @@ import (
 
 func TestCreateExpense_Success(t *testing.T) {
 	mockRepo := new(mocks.MockExpenseRepo)
-	svc := services.NewExpenseService(mockRepo)
+	svc := services.NewExpenseService(mockRepo, config.Redis)
 
 	expense := &models.Expense{
 		ID:       1,
@@ -34,7 +35,7 @@ func TestCreateExpense_Success(t *testing.T) {
 
 func TestCreateExpense_Failure(t *testing.T) {
 	mockRepo := new(mocks.MockExpenseRepo)
-	svc := services.NewExpenseService(mockRepo)
+	svc := services.NewExpenseService(mockRepo, config.Redis)
 
 	expense := &models.Expense{ID: 2, UserID: 20, Amount: 200, Currency: "EUR", Category: "meals"}
 	expectedErr := errors.New("db error")
@@ -51,7 +52,7 @@ func TestCreateExpense_Failure(t *testing.T) {
 
 func TestGetExpenseByID_Success(t *testing.T) {
 	mockRepo := new(mocks.MockExpenseRepo)
-	svc := services.NewExpenseService(mockRepo)
+	svc := services.NewExpenseService(mockRepo, config.Redis)
 
 	expenseID := uint(3)
 	expectedExpense := &models.Expense{ID: expenseID, UserID: 30, Amount: 300, Currency: "NGN", Category: "office"}
@@ -67,7 +68,7 @@ func TestGetExpenseByID_Success(t *testing.T) {
 
 func TestGetExpenseByID_NotFound(t *testing.T) {
 	mockRepo := new(mocks.MockExpenseRepo)
-	svc := services.NewExpenseService(mockRepo)
+	svc := services.NewExpenseService(mockRepo, config.Redis)
 
 	expenseID := uint(4)
 

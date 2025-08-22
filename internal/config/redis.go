@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"log"
 	"os"
 
 	"github.com/go-redis/redis/v8"
@@ -9,12 +10,15 @@ import (
 
 var Redis *redis.Client
 
-func ConnectRedis() error {
+func ConnectRedis() {
 	Redis = redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_ADDR"),
 		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,
 	})
 
-	return Redis.Ping(context.Background()).Err()
+	_, err := Redis.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("failed to connect to redis: %v", err)
+	}
 }

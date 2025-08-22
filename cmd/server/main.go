@@ -22,9 +22,7 @@ func init() {
 	if err := config.ConnectDatabase(); err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
-	if err := config.ConnectRedis(); err != nil {
-		log.Fatalf("failed to connect to Redis: %v", err)
-	}
+	config.ConnectRedis()
 	log.Println("✅ Successfully connected to the database and Redis")
 }
 
