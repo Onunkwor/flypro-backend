@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,8 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 	var request dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		utils.ValidationErrorResponse(c, err)
+		formatted := utils.FormatValidationError(err)
+		utils.ValidationErrorResponse(c, formatted)
 		return
 	}
 
@@ -42,4 +44,24 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		"message": "user created successfully",
 		"user":    user,
 	})
+}
+
+func (h *UserHandler) GetUserByID(c *gin.Context) {
+	idParam := c.Param("id")
+	var id uint
+	if _, err := fmt.Sscan(idParam, &id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	user, err := h.service.GetUserByID(id)
+	if err != nil {
+		if errors.Is(err, services.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+		utils.InternalServerErrorResponse(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }

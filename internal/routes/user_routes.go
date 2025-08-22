@@ -15,5 +15,6 @@ func RegisterUserRoutes(router *gin.Engine) {
 	userGroup := router.Group("/api/users")
 	{
 		userGroup.POST("", userHandler.CreateUser)
+		userGroup.GET("/:id", userHandler.GetUserByID)
 	}
 }
