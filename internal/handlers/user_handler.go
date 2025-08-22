@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/onunkwor/flypro-backend/internal/dto"
 	"github.com/onunkwor/flypro-backend/internal/models"
+	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/services"
 	"github.com/onunkwor/flypro-backend/internal/utils"
 )
@@ -48,15 +49,15 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	idParam := c.Param("id")
-	var id uint
-	if _, err := fmt.Sscan(idParam, &id); err != nil {
+	id, err := strconv.Atoi(idParam)
+	if err != nil || id <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
 
-	user, err := h.service.GetUserByID(id)
+	user, err := h.service.GetUserByID(uint(id))
 	if err != nil {
-		if errors.Is(err, services.ErrUserNotFound) {
+		if errors.Is(err, repository.ErrUserNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
 		}

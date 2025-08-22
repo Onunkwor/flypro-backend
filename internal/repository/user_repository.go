@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/onunkwor/flypro-backend/internal/models"
 	"gorm.io/gorm"
 )
@@ -10,6 +12,10 @@ type UserRepository interface {
 	GetUserByID(id uint) (*models.User, error)
 	FindByEmail(email string) (*models.User, error)
 }
+
+var (
+	ErrUserNotFound = errors.New("user not found")
+)
 
 type userRepo struct {
 	db *gorm.DB
@@ -29,14 +35,21 @@ func (r *userRepo) CreateUser(user *models.User) error {
 func (r *userRepo) FindByEmail(email string) (*models.User, error) {
 	var u models.User
 	if err := r.db.Where("email = ?", email).First(&u).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 	}
 	return &u, nil
+
 }
 
 func (r *userRepo) GetUserByID(id uint) (*models.User, error) {
 	var u models.User
 	if err := r.db.First(&u, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 	}
 	return &u, nil

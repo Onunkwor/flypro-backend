@@ -5,11 +5,11 @@ import (
 
 	"github.com/onunkwor/flypro-backend/internal/models"
 	"github.com/onunkwor/flypro-backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
-	ErrUserNotFound       = errors.New("user not found")
 )
 
 type UserService struct {
@@ -21,16 +21,22 @@ func NewUserService(repo repository.UserRepository) *UserService {
 }
 
 func (s *UserService) CreateUser(user *models.User) error {
-	if existing, _ := s.repo.FindByEmail(user.Email); existing != nil {
+	existing, err := s.repo.FindByEmail(user.Email)
+	if err == nil && existing != nil {
 		return ErrEmailAlreadyExists
 	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
 	return s.repo.CreateUser(user)
 }
 
 func (s *UserService) GetUserByID(id uint) (*models.User, error) {
 	user, err := s.repo.GetUserByID(id)
 	if err != nil {
-		return nil, ErrUserNotFound
+		return nil, err
 	}
 	return user, nil
+
 }

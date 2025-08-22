@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,12 +24,28 @@ func InternalServerErrorResponse(c *gin.Context, err error) {
 
 func FormatValidationError(err error) map[string]string {
 	out := map[string]string{}
+
 	if errs, ok := err.(validator.ValidationErrors); ok {
 		for _, fe := range errs {
-			out[fe.Field()] = fe.Tag()
+			field := fe.Field()
+			switch fe.Tag() {
+			case "required":
+				out[field] = fmt.Sprintf("%s is required", field)
+			case "email":
+				out[field] = fmt.Sprintf("%s must be a valid email address", field)
+			case "min":
+				out[field] = fmt.Sprintf("%s must be at least %s characters long", field, fe.Param())
+			case "max":
+				out[field] = fmt.Sprintf("%s must be at most %s characters long", field, fe.Param())
+			case "len":
+				out[field] = fmt.Sprintf("%s must be exactly %s characters long", field, fe.Param())
+			default:
+				out[field] = fmt.Sprintf("%s is not valid (%s)", field, fe.Tag())
+			}
 		}
 	} else {
 		out["error"] = err.Error()
 	}
+
 	return out
 }

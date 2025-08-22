@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/onunkwor/flypro-backend/internal/models"
+	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/repository/mocks"
 	"github.com/onunkwor/flypro-backend/internal/services"
 	"github.com/stretchr/testify/assert"
@@ -46,13 +47,13 @@ func TestGetUserByID_NotFound(t *testing.T) {
 	svc := services.NewUserService(mockRepo)
 	userID := uint(2)
 
-	mockRepo.On("GetUserByID", userID).Return(nil, services.ErrUserNotFound)
+	mockRepo.On("GetUserByID", userID).Return(nil, repository.ErrUserNotFound)
 
 	user, err := svc.GetUserByID(userID)
 
 	assert.Error(t, err)
 	assert.Nil(t, user)
-	assert.Equal(t, services.ErrUserNotFound, err)
+	assert.Equal(t, repository.ErrUserNotFound, err)
 	mockRepo.AssertExpectations(t)
 }
 
