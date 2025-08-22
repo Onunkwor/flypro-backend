@@ -49,3 +49,10 @@ func FormatValidationError(err error) map[string]string {
 
 	return out
 }
+
+func BadRequestResponse(c *gin.Context, message string) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"error":   "bad_request",
+		"message": message,
+	})
+}

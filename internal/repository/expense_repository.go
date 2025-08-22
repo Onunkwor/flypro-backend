@@ -17,6 +17,7 @@ type ExpenseRepository interface {
 	FindAll(filters map[string]interface{}, offset, limit int) ([]models.Expense, error)
 	Update(expense *models.Expense) error
 	Delete(id uint) error
+	UpdateExpenseAmountUSD(expenseID uint, amountUSD float64) error
 }
 
 type expenseRepo struct {
@@ -63,4 +64,10 @@ func (r *expenseRepo) FindAll(filters map[string]interface{}, offset, limit int)
 		return nil, err
 	}
 	return expenses, nil
+}
+
+func (r *expenseRepo) UpdateExpenseAmountUSD(expenseID uint, amountUSD float64) error {
+	return r.db.Model(&models.Expense{}).
+		Where("id = ?", expenseID).
+		Update("amount_usd", amountUSD).Error
 }

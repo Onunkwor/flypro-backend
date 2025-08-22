@@ -38,3 +38,8 @@ func (m *MockExpenseRepo) Delete(id uint) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
+
+func (m *MockExpenseRepo) UpdateExpenseAmountUSD(expenseID uint, amountUSD float64) error {
+	args := m.Called(expenseID, amountUSD)
+	return args.Error(0)
+}
