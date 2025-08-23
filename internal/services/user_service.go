@@ -10,7 +10,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/onunkwor/flypro-backend/internal/models"
 	"github.com/onunkwor/flypro-backend/internal/repository"
-	"gorm.io/gorm"
 )
 
 var (
@@ -28,13 +27,12 @@ func NewUserService(r *redis.Client, repo repository.UserRepository) *UserServic
 
 func (s *UserService) CreateUser(user *models.User) error {
 	existing, err := s.repo.FindByEmail(user.Email)
-	if err == nil && existing != nil {
-		return ErrEmailAlreadyExists
-	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil && !errors.Is(err, repository.ErrNotFound) {
 		return err
 	}
-
+	if existing != nil {
+		return ErrEmailAlreadyExists
+	}
 	return s.repo.CreateUser(user)
 }
 

@@ -7,6 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var ErrNotFound = errors.New("repository: not found")
+
 type UserRepository interface {
 	CreateUser(user *models.User) error
 	GetUserByID(id uint) (*models.User, error)
@@ -32,19 +34,18 @@ func (r *userRepo) FindByEmail(email string) (*models.User, error) {
 	var u models.User
 	if err := r.db.Where("email = ?", email).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, gorm.ErrRecordNotFound
+			return nil, ErrNotFound
 		}
 		return nil, err
 	}
 	return &u, nil
-
 }
 
 func (r *userRepo) GetUserByID(id uint) (*models.User, error) {
 	var u models.User
 	if err := r.db.First(&u, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, gorm.ErrRecordNotFound
+			return nil, ErrNotFound
 		}
 		return nil, err
 	}
