@@ -40,11 +40,13 @@ func (s *UserService) CreateUser(user *models.User) error {
 
 func (s *UserService) GetUserByID(ctx context.Context, id uint) (*models.User, error) {
 	key := fmt.Sprintf("user:%d", id)
-	val, err := s.redis.Get(ctx, key).Result()
-	if err == nil {
-		var user models.User
-		if err := json.Unmarshal([]byte(val), &user); err == nil {
-			return &user, nil
+	if s.redis != nil {
+		val, err := s.redis.Get(ctx, key).Result()
+		if err == nil {
+			var user models.User
+			if err := json.Unmarshal([]byte(val), &user); err == nil {
+				return &user, nil
+			}
 		}
 	}
 	user, err := s.repo.GetUserByID(id)
@@ -52,7 +54,9 @@ func (s *UserService) GetUserByID(ctx context.Context, id uint) (*models.User, e
 		return nil, err
 	}
 	bytes, _ := json.Marshal(user)
-	s.redis.Set(ctx, key, bytes, time.Hour)
+	if s.redis != nil {
+		s.redis.Set(ctx, key, bytes, time.Hour)
+	}
 	return user, nil
 
 }

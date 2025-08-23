@@ -16,10 +16,10 @@ var (
 type ReportService struct {
 	repo        repository.ReportRepository
 	expenseRepo repository.ExpenseRepository
-	currencySvc *CurrencyService
+	currencySvc CurrencyConverter
 }
 
-func NewReportService(r repository.ReportRepository, exp repository.ExpenseRepository, cur *CurrencyService) *ReportService {
+func NewReportService(r repository.ReportRepository, exp repository.ExpenseRepository, cur CurrencyConverter) *ReportService {
 	return &ReportService{repo: r, expenseRepo: exp, currencySvc: cur}
 }
 
