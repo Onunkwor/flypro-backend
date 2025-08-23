@@ -34,13 +34,37 @@ func (r *reportRepo) Create(report *models.ExpenseReport) error {
 }
 
 func (r *reportRepo) AddExpense(reportID, userID, expenseID uint) error {
-	// Check ownership
+
 	var expense models.Expense
 	if err := r.db.First(&expense, expenseID).Error; err != nil {
-		return ErrReportNotFound
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrExpenseNotFound
+		}
+		return err
 	}
+
 	if expense.UserID != userID {
 		return ErrInvalidOwnership
+	}
+
+	var report models.ExpenseReport
+	if err := r.db.First(&report, reportID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrReportNotFound
+		}
+		return err
+	}
+
+	if report.UserID != userID {
+		return ErrInvalidOwnership
+	}
+
+	var count int64
+	if err := r.db.Model(&models.ReportExpense{}).
+		Where("report_id = ? AND expense_id = ?", reportID, expenseID).
+		Count(&count).Error; err == nil && count > 0 {
+
+		return nil
 	}
 
 	link := models.ReportExpense{ReportID: reportID, ExpenseID: expenseID}

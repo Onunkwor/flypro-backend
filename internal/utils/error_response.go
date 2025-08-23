@@ -56,3 +56,14 @@ func BadRequestResponse(c *gin.Context, message string) {
 		"message": message,
 	})
 }
+
+func ForbiddenResponse(c *gin.Context, message string) {
+	c.JSON(http.StatusForbidden, gin.H{"error": message})
+}
+
+func NotFoundResponse(c *gin.Context, message string) {
+	c.JSON(http.StatusNotFound, gin.H{
+		"error":   "not_found",
+		"message": message,
+	})
+}

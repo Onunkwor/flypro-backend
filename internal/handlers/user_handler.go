@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/onunkwor/flypro-backend/internal/dto"
 	"github.com/onunkwor/flypro-backend/internal/models"
+	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/services"
 	"github.com/onunkwor/flypro-backend/internal/utils"
-	"gorm.io/gorm"
 )
 
 type UserHandler struct {
@@ -22,7 +22,6 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 func (h *UserHandler) CreateUser(c *gin.Context) {
-
 	var request dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		formatted := utils.FormatValidationError(err)
@@ -30,11 +29,13 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 	request.Sanitize()
+
 	user := models.User{
 		Email: request.Email,
 		Name:  request.Name,
 	}
-	if err := h.service.CreateUser(&user); err != nil {
+	response, err := h.service.CreateUser(&user)
+	if err != nil {
 		if errors.Is(err, services.ErrEmailAlreadyExists) {
 			c.JSON(http.StatusConflict, gin.H{"error": "email already exists"})
 			return
@@ -44,7 +45,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "user created successfully",
-		"user":    user,
+		"user":    response,
 	})
 }
 
@@ -56,14 +57,14 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.GetUserByID(context.Background(), uint(id))
+	response, err := h.service.GetUserByID(context.Background(), uint(id))
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, repository.ErrNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
 		}
 		utils.InternalServerErrorResponse(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"user": user})
+	c.JSON(http.StatusOK, gin.H{"user": response})
 }

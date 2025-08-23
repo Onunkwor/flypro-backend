@@ -46,7 +46,7 @@ func (s *ExpenseService) ListExpenses(filters map[string]interface{}, offset, li
 			return expenses, nil
 		}
 	} else if err != redis.Nil {
-		return nil, err // surface real redis errors
+		return nil, err
 	}
 
 	expenses, e := s.repo.FindAll(filters, offset, limit)

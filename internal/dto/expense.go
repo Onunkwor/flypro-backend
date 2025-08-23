@@ -3,6 +3,7 @@ package dto
 import (
 	"time"
 
+	"github.com/onunkwor/flypro-backend/internal/models"
 	"github.com/onunkwor/flypro-backend/internal/utils"
 )
 
@@ -46,4 +47,28 @@ type ExpenseResponse struct {
 	Status      string    `json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+func ToExpenseResponse(expense *models.Expense) ExpenseResponse {
+	return ExpenseResponse{
+		ID:          expense.ID,
+		UserID:      expense.UserID,
+		Amount:      expense.Amount,
+		AmountUSD:   expense.AmountUSD,
+		Currency:    expense.Currency,
+		Category:    expense.Category,
+		Description: expense.Description,
+		Receipt:     expense.Receipt,
+		Status:      expense.Status,
+		CreatedAt:   expense.CreatedAt,
+		UpdatedAt:   expense.UpdatedAt,
+	}
+}
+
+func ToExpenseResponses(expenses []models.Expense) []ExpenseResponse {
+	res := make([]ExpenseResponse, len(expenses))
+	for i, exp := range expenses {
+		res[i] = ToExpenseResponse(&exp)
+	}
+	return res
 }

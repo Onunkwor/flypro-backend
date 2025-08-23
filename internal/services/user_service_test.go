@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/onunkwor/flypro-backend/internal/config"
+	"github.com/onunkwor/flypro-backend/internal/dto"
 	"github.com/onunkwor/flypro-backend/internal/models"
 	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/repository/mocks"
 	"github.com/onunkwor/flypro-backend/internal/services"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
 func TestCreateUser_EmailAlreadyExists(t *testing.T) {
@@ -21,7 +21,7 @@ func TestCreateUser_EmailAlreadyExists(t *testing.T) {
 
 	mockRepo.On("FindByEmail", existingUser.Email).Return(existingUser, nil)
 
-	err := svc.CreateUser(existingUser)
+	_, err := svc.CreateUser(existingUser)
 
 	assert.Equal(t, services.ErrEmailAlreadyExists, err)
 	mockRepo.AssertExpectations(t)
@@ -36,7 +36,7 @@ func TestCreateUser_Success(t *testing.T) {
 	mockRepo.On("FindByEmail", newUser.Email).Return(nil, repository.ErrNotFound)
 	mockRepo.On("CreateUser", newUser).Return(nil)
 
-	err := svc.CreateUser(newUser)
+	_, err := svc.CreateUser(newUser)
 
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)
@@ -49,11 +49,10 @@ func TestGetUserByID_NotFound(t *testing.T) {
 
 	mockRepo.On("GetUserByID", userID).Return(nil, repository.ErrNotFound)
 
-	user, err := svc.GetUserByID(context.Background(), userID)
+	_, err := svc.GetUserByID(context.Background(), userID)
 
 	assert.Error(t, err)
-	assert.Nil(t, user)
-	assert.Equal(t, gorm.ErrRecordNotFound, err)
+	assert.Equal(t, repository.ErrNotFound, err)
 	mockRepo.AssertExpectations(t)
 }
 
@@ -65,9 +64,13 @@ func TestGetUserByID_Success(t *testing.T) {
 	expectedUser := &models.User{ID: userID, Email: "cake@gmail.com"}
 	mockRepo.On("GetUserByID", userID).Return(expectedUser, nil)
 
-	user, err := svc.GetUserByID(context.Background(), userID)
+	response, err := svc.GetUserByID(context.Background(), userID)
 
 	assert.NoError(t, err)
-	assert.Equal(t, expectedUser, user)
+	assert.Equal(t, dto.UserResponse{
+		ID:    expectedUser.ID,
+		Email: expectedUser.Email,
+		Name:  expectedUser.Name,
+	}, response)
 	mockRepo.AssertExpectations(t)
 }
