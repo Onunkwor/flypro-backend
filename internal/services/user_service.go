@@ -44,9 +44,11 @@ func (s *UserService) GetUserByID(ctx context.Context, id uint) (*models.User, e
 		val, err := s.redis.Get(ctx, key).Result()
 		if err == nil {
 			var user models.User
-			if err := json.Unmarshal([]byte(val), &user); err == nil {
+			if unmarshalErr := json.Unmarshal([]byte(val), &user); unmarshalErr == nil {
 				return &user, nil
 			}
+		} else if err != redis.Nil {
+			return nil, err
 		}
 	}
 	user, err := s.repo.GetUserByID(id)

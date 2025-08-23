@@ -13,10 +13,6 @@ type UserRepository interface {
 	FindByEmail(email string) (*models.User, error)
 }
 
-var (
-	ErrUserNotFound = errors.New("user not found")
-)
-
 type userRepo struct {
 	db *gorm.DB
 }
@@ -36,7 +32,7 @@ func (r *userRepo) FindByEmail(email string) (*models.User, error) {
 	var u models.User
 	if err := r.db.Where("email = ?", email).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUserNotFound
+			return nil, gorm.ErrRecordNotFound
 		}
 		return nil, err
 	}
@@ -48,7 +44,7 @@ func (r *userRepo) GetUserByID(id uint) (*models.User, error) {
 	var u models.User
 	if err := r.db.First(&u, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUserNotFound
+			return nil, gorm.ErrRecordNotFound
 		}
 		return nil, err
 	}

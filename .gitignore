@@ -25,7 +25,7 @@ tmp/
 
 # Environment files
 .env
-.env.*
+
 
 # IDE/editor files
 .vscode/
@@ -37,3 +37,4 @@ tmp/
 # Docker
 *.log
 docker-data/
+

@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/onunkwor/flypro-backend/internal/dto"
 	"github.com/onunkwor/flypro-backend/internal/models"
-	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/services"
 	"github.com/onunkwor/flypro-backend/internal/utils"
+	"gorm.io/gorm"
 )
 
 type UserHandler struct {
@@ -58,7 +58,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 
 	user, err := h.service.GetUserByID(context.Background(), uint(id))
 	if err != nil {
-		if errors.Is(err, repository.ErrUserNotFound) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
 		}

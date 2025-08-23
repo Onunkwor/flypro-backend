@@ -6,10 +6,10 @@ import (
 
 	"github.com/onunkwor/flypro-backend/internal/config"
 	"github.com/onunkwor/flypro-backend/internal/models"
-	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/repository/mocks"
 	"github.com/onunkwor/flypro-backend/internal/services"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 func TestCreateUser_EmailAlreadyExists(t *testing.T) {
@@ -32,7 +32,7 @@ func TestCreateUser_Success(t *testing.T) {
 
 	newUser := &models.User{Email: "cake@gmail.com"}
 
-	mockRepo.On("FindByEmail", newUser.Email).Return(nil, nil)
+	mockRepo.On("FindByEmail", newUser.Email).Return(nil, gorm.ErrRecordNotFound)
 	mockRepo.On("CreateUser", newUser).Return(nil)
 
 	err := svc.CreateUser(newUser)
@@ -46,13 +46,13 @@ func TestGetUserByID_NotFound(t *testing.T) {
 	svc := services.NewUserService(nil, mockRepo)
 	userID := uint(2)
 
-	mockRepo.On("GetUserByID", userID).Return(nil, repository.ErrUserNotFound)
+	mockRepo.On("GetUserByID", userID).Return(nil, gorm.ErrRecordNotFound)
 
 	user, err := svc.GetUserByID(context.Background(), userID)
 
 	assert.Error(t, err)
 	assert.Nil(t, user)
-	assert.Equal(t, repository.ErrUserNotFound, err)
+	assert.Equal(t, gorm.ErrRecordNotFound, err)
 	mockRepo.AssertExpectations(t)
 }
 
