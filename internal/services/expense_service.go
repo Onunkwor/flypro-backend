@@ -57,7 +57,7 @@ func (s *ExpenseService) ListExpenses(filters map[string]interface{}, offset, li
 		return nil, err
 	}
 	if data, err := json.Marshal(expenses); err == nil {
-		_ = s.redis.Set(ctx, key, data, 2*time.Minute).Err()
+		_ = s.redis.Set(ctx, key, data, 30*time.Minute).Err()
 	}
 
 	return expenses, nil

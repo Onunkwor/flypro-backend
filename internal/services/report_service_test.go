@@ -25,7 +25,7 @@ func TestSubmitReport_Success(t *testing.T) {
 	mockRepo := new(mocks.MockReportRepo)
 	mockExpRepo := new(mocks.MockExpenseRepo)
 
-	svc := services.NewReportService(mockRepo, mockExpRepo, nil)
+	svc := services.NewReportService(mockRepo, mockExpRepo, nil, nil)
 
 	report := &models.ExpenseReport{
 		ID:     1,
@@ -46,7 +46,7 @@ func TestSubmitReport_InvalidOwnership(t *testing.T) {
 	mockRepo := new(mocks.MockReportRepo)
 	mockExpRepo := new(mocks.MockExpenseRepo)
 
-	svc := services.NewReportService(mockRepo, mockExpRepo, nil)
+	svc := services.NewReportService(mockRepo, mockExpRepo, nil, nil)
 
 	report := &models.ExpenseReport{
 		ID:     1,
@@ -64,7 +64,7 @@ func TestSubmitReport_InvalidOwnership(t *testing.T) {
 func TestSubmitReport_InvalidState(t *testing.T) {
 	mockRepo := new(mocks.MockReportRepo)
 	mockExpRepo := new(mocks.MockExpenseRepo)
-	svc := services.NewReportService(mockRepo, mockExpRepo, nil)
+	svc := services.NewReportService(mockRepo, mockExpRepo, nil, nil)
 
 	report := &models.ExpenseReport{
 		ID:     1,
@@ -86,7 +86,7 @@ func TestListReports_ConvertsToUSD(t *testing.T) {
 	mockExpRepo := new(mocks.MockExpenseRepo)
 	mockCur := new(MockCurrencySvc)
 
-	svc := services.NewReportService(mockRepo, mockExpRepo, mockCur)
+	svc := services.NewReportService(mockRepo, mockExpRepo, mockCur, nil)
 
 	reports := []models.ExpenseReport{
 		{
@@ -120,7 +120,7 @@ func TestListReports_FailsOnCurrencyError(t *testing.T) {
 	mockExpRepo := new(mocks.MockExpenseRepo)
 	mockCur := new(MockCurrencySvc)
 
-	svc := services.NewReportService(mockRepo, mockExpRepo, mockCur)
+	svc := services.NewReportService(mockRepo, mockExpRepo, mockCur, nil)
 
 	reports := []models.ExpenseReport{
 		{

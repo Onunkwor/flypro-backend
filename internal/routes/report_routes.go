@@ -13,7 +13,7 @@ func RegisterReportRoutes(r *gin.Engine) {
 	reportRepo := repository.NewReportRepository(config.DB)
 	expenseRepo := repository.NewExpenseRepository(config.DB)
 	currencySvc := services.NewCurrencyService(config.Redis, config.EnvCurrencyAPIKey())
-	reportService := services.NewReportService(reportRepo, expenseRepo, currencySvc)
+	reportService := services.NewReportService(reportRepo, expenseRepo, currencySvc, config.Redis)
 	reportHandler := handlers.NewReportHandler(reportService)
 
 	api := r.Group("/api/reports")
