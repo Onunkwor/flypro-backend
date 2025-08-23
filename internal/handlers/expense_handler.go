@@ -29,7 +29,7 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 		utils.ValidationErrorResponse(c, formatted)
 		return
 	}
-
+	req.Sanitize()
 	expense := &models.Expense{
 		UserID:      req.UserID,
 		Amount:      req.Amount,
@@ -81,7 +81,7 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 		utils.ValidationErrorResponse(c, formatted)
 		return
 	}
-
+	req.Sanitize()
 	expense := &models.Expense{
 		ID:          uint(id),
 		UserID:      req.UserID,

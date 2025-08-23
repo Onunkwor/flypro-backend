@@ -25,6 +25,7 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 		utils.ValidationErrorResponse(c, utils.FormatValidationError(err))
 		return
 	}
+	req.Sanitize()
 	report := &models.ExpenseReport{
 		Title:  req.Title,
 		UserID: req.UserID,
