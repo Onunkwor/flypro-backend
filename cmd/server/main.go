@@ -8,8 +8,11 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/onunkwor/flypro-backend/internal/config"
+	"github.com/onunkwor/flypro-backend/internal/middleware"
 	"github.com/onunkwor/flypro-backend/internal/routes"
 	"github.com/onunkwor/flypro-backend/internal/validators"
+	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 )
 
 func init() {
@@ -33,7 +36,21 @@ func main() {
 	}
 	gin.SetMode(mode)
 
-	router := gin.Default()
+	// Create custom gin engine (not gin.Default(), so we control middlewares)
+	router := gin.New()
+
+	// zap logger for structured logs
+	logger, _ := zap.NewProduction()
+	router.Use(middleware.RequestLogger(logger))
+
+	// recover from panics
+	router.Use(gin.Recovery())
+
+	// CORS
+	router.Use(middleware.CORSMiddleware())
+
+	// Rate limit: 5 requests/sec, burst of 10
+	router.Use(middleware.RateLimiter(rate.Limit(5), 10))
 
 	if err := router.SetTrustedProxies([]string{"127.0.0.1"}); err != nil {
 		log.Fatalf("failed to set trusted proxies: %v", err)
@@ -42,6 +59,7 @@ func main() {
 	// Register routes
 	routes.RegisterUserRoutes(router)
 	routes.RegisterExpenseRoutes(router)
+	routes.RegisterReportRoutes(router)
 
 	port := os.Getenv("PORT")
 	if port == "" {
