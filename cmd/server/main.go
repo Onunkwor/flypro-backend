@@ -21,6 +21,9 @@ func init() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", validators.CurrencyValidator)
 	}
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("category", validators.CategoryValidator)
+	}
 
 	if err := config.ConnectDatabase(); err != nil {
 		log.Fatalf("failed to connect to database: %v", err)

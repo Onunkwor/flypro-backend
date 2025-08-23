@@ -29,12 +29,15 @@ func NewExpenseRepository(db *gorm.DB) ExpenseRepository {
 }
 
 func (r *expenseRepo) Create(expense *models.Expense) error {
-	return r.db.Create(expense).Error
+	if err := r.db.Create(expense).Error; err != nil {
+		return err
+	}
+	return r.db.Preload("User").First(expense, expense.ID).Error
 }
 
 func (r *expenseRepo) GetExpenseByID(id uint) (*models.Expense, error) {
 	var expense models.Expense
-	if err := r.db.First(&expense, id).Error; err != nil {
+	if err := r.db.Preload("User").First(&expense, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrExpenseNotFound
 		}
@@ -44,12 +47,26 @@ func (r *expenseRepo) GetExpenseByID(id uint) (*models.Expense, error) {
 }
 
 func (r *expenseRepo) Update(expense *models.Expense) error {
-	return r.db.Save(expense).Error
+	res := r.db.Model(&models.Expense{}).
+		Where("id = ?", expense.ID).
+		Updates(expense)
+
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return ErrExpenseNotFound
+	}
+	return nil
 }
 
 func (r *expenseRepo) Delete(id uint) error {
-	if err := r.db.Delete(&models.Expense{}, id).Error; err != nil {
-		return err
+	res := r.db.Delete(&models.Expense{}, id)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return ErrExpenseNotFound
 	}
 	return nil
 }
@@ -67,7 +84,15 @@ func (r *expenseRepo) FindAll(filters map[string]interface{}, offset, limit int)
 }
 
 func (r *expenseRepo) UpdateExpenseAmountUSD(expenseID uint, amountUSD float64) error {
-	return r.db.Model(&models.Expense{}).
+	res := r.db.Model(&models.Expense{}).
 		Where("id = ?", expenseID).
-		Update("amount_usd", amountUSD).Error
+		Update("amount_usd", amountUSD)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return ErrExpenseNotFound
+	}
+	return nil
+
 }

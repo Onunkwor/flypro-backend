@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/onunkwor/flypro-backend/internal/dto"
 	"github.com/onunkwor/flypro-backend/internal/models"
-	"github.com/onunkwor/flypro-backend/internal/repository"
 	"github.com/onunkwor/flypro-backend/internal/services"
 	"github.com/onunkwor/flypro-backend/internal/utils"
+	"gorm.io/gorm"
 )
 
 type ExpenseHandler struct {
@@ -24,6 +24,7 @@ func NewExpenseHandler(svc *services.ExpenseService) *ExpenseHandler {
 // POST /api/expenses
 func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 	var req dto.CreateExpenseRequest
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		formatted := utils.FormatValidationError(err)
 		utils.ValidationErrorResponse(c, formatted)
@@ -56,7 +57,7 @@ func (h *ExpenseHandler) GetExpenseByID(c *gin.Context) {
 
 	expense, err := h.svc.GetExpenseByID(uint(id))
 	if err != nil {
-		if err == repository.ErrExpenseNotFound {
+		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "expense not found"})
 			return
 		}
@@ -108,7 +109,7 @@ func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 	}
 
 	if err := h.svc.DeleteExpense(uint(id)); err != nil {
-		if err == repository.ErrExpenseNotFound {
+		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "expense not found"})
 			return
 		}

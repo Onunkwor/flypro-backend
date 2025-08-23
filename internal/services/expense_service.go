@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -26,14 +25,8 @@ func (s *ExpenseService) CreateExpense(expense *models.Expense) error {
 }
 
 func (s *ExpenseService) GetExpenseByID(id uint) (*models.Expense, error) {
-	expense, err := s.repo.GetExpenseByID(id)
-	if err != nil {
-		if errors.Is(err, repository.ErrExpenseNotFound) {
-			return nil, repository.ErrExpenseNotFound
-		}
-		return nil, err
-	}
-	return expense, nil
+	return s.repo.GetExpenseByID(id)
+
 }
 
 func (s *ExpenseService) UpdateExpense(expense *models.Expense) error {
@@ -47,14 +40,18 @@ func (s *ExpenseService) DeleteExpense(id uint) error {
 func (s *ExpenseService) ListExpenses(filters map[string]interface{}, offset, limit int, ctx context.Context) ([]models.Expense, error) {
 	key := utils.MakeCacheKey(filters, offset, limit)
 	var expenses []models.Expense
-	if cached, err := s.redis.Get(ctx, key).Result(); err == nil {
-		if err := json.Unmarshal([]byte(cached), &expenses); err == nil {
+	cached, err := s.redis.Get(ctx, key).Result()
+	if err == nil {
+		if unmarshalErr := json.Unmarshal([]byte(cached), &expenses); unmarshalErr == nil {
 			return expenses, nil
 		}
+	} else if err != redis.Nil {
+		return nil, err // surface real redis errors
 	}
-	expenses, err := s.repo.FindAll(filters, offset, limit)
-	if err != nil {
-		return nil, err
+
+	expenses, e := s.repo.FindAll(filters, offset, limit)
+	if e != nil {
+		return nil, e
 	}
 	if data, err := json.Marshal(expenses); err == nil {
 		_ = s.redis.Set(ctx, key, data, 30*time.Minute).Err()
