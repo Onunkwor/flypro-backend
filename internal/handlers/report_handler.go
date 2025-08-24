@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/onunkwor/flypro-backend/internal/dto"
@@ -27,16 +28,23 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 		utils.ValidationErrorResponse(c, utils.FormatValidationError(err))
 		return
 	}
+
 	report := &models.ExpenseReport{
 		Title:  req.Title,
 		UserID: req.UserID,
 		Status: "draft",
 	}
+
 	if err := h.svc.CreateReport(report); err != nil {
+		if strings.Contains(err.Error(), "does not exist") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		utils.InternalServerErrorResponse(c, err)
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"report": dto.ToReportDTO(*report)})
+
+	c.JSON(http.StatusCreated, gin.H{"report": report})
 }
 
 func (h *ReportHandler) AddExpense(c *gin.Context) {
@@ -86,7 +94,7 @@ func (h *ReportHandler) ListReports(c *gin.Context) {
 		return
 	}
 
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
 	reports, err := h.svc.ListReports(uint(userID), offset, limit)
@@ -94,7 +102,7 @@ func (h *ReportHandler) ListReports(c *gin.Context) {
 		utils.InternalServerErrorResponse(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"reports": dto.ToReportDTOs(reports)})
+	c.JSON(http.StatusOK, gin.H{"reports": reports})
 }
 
 func (h *ReportHandler) SubmitReport(c *gin.Context) {

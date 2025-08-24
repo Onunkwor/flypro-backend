@@ -41,3 +41,13 @@ func (m *MockReportRepo) UpdateReportTotal(reportID uint, total float64) error {
 	args := m.Called(reportID, total)
 	return args.Error(0)
 }
+
+func (m *MockReportRepo) UserExists(userID uint) (bool, error) {
+	args := m.Called(userID)
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockReportRepo) LoadReportRelations(report *models.ExpenseReport) error {
+	args := m.Called(report)
+	return args.Error(0)
+}

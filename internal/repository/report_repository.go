@@ -19,6 +19,8 @@ type ReportRepository interface {
 	List(userID uint, offset, limit int) ([]models.ExpenseReport, error)
 	Update(report *models.ExpenseReport) error
 	UpdateReportTotal(reportID uint, total float64) error
+	UserExists(userID uint) (bool, error)
+	LoadReportRelations(report *models.ExpenseReport) error
 }
 
 type reportRepo struct {
@@ -31,6 +33,22 @@ func NewReportRepository(db *gorm.DB) ReportRepository {
 
 func (r *reportRepo) Create(report *models.ExpenseReport) error {
 	return r.db.Create(report).Error
+}
+
+func (r *reportRepo) UserExists(userID uint) (bool, error) {
+	var count int64
+	if err := r.db.Model(&models.User{}).
+		Where("id = ?", userID).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *reportRepo) LoadReportRelations(report *models.ExpenseReport) error {
+	return r.db.Preload("User").
+		Preload("Expenses").
+		First(report, report.ID).Error
 }
 
 func (r *reportRepo) AddExpense(reportID, userID, expenseID uint) error {
@@ -87,6 +105,7 @@ func (r *reportRepo) List(userID uint, offset, limit int) ([]models.ExpenseRepor
 	if err := r.db.Where("user_id = ?", userID).
 		Offset(offset).Limit(limit).
 		Preload("Expenses").
+		Preload("User").
 		Find(&reports).Error; err != nil {
 		return nil, err
 	}

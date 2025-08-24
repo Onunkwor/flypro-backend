@@ -32,9 +32,25 @@ func NewReportService(r repository.ReportRepository, exp repository.ExpenseRepos
 	}
 }
 
+// service.go
 func (s *ReportService) CreateReport(report *models.ExpenseReport) error {
+	exists, err := s.repo.UserExists(report.UserID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("user with id %d does not exist", report.UserID)
+	}
 
-	return s.repo.Create(report)
+	if err := s.repo.Create(report); err != nil {
+		return err
+	}
+
+	if err := s.repo.LoadReportRelations(report); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *ReportService) AddExpense(reportID, userID, expenseID uint) error {
@@ -45,14 +61,14 @@ func (s *ReportService) ListReports(userID uint, offset, limit int) ([]models.Ex
 	ctx := context.Background()
 	cacheKey := fmt.Sprintf("report_summaries:%d:%d:%d", userID, offset, limit)
 
-	if s.redis != nil {
-		if cached, err := s.redis.Get(ctx, cacheKey).Result(); err == nil {
-			var reports []models.ExpenseReport
-			if json.Unmarshal([]byte(cached), &reports) == nil {
-				return reports, nil
-			}
-		}
-	}
+	// if s.redis != nil {
+	// 	if cached, err := s.redis.Get(ctx, cacheKey).Result(); err == nil {
+	// 		var reports []models.ExpenseReport
+	// 		if json.Unmarshal([]byte(cached), &reports) == nil {
+	// 			return reports, nil
+	// 		}
+	// 	}
+	// }
 
 	reports, err := s.repo.List(userID, offset, limit)
 	if err != nil {
