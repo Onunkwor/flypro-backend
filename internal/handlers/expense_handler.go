@@ -172,11 +172,11 @@ func (h *ExpenseHandler) ListExpenses(c *gin.Context) {
 	filters := make(map[string]interface{})
 	if userID := c.Query("user_id"); userID != "" {
 		if uid, err := strconv.Atoi(userID); err == nil && uid > 0 {
-			filters["user_id"] = uid
+			filters["user_id"] = uint(uid)
 		}
 	}
 	if category := c.Query("category"); category != "" {
-		filters["category"] = category
+		filters["category"] = utils.NormalizeCategory(category)
 	}
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err := strconv.Atoi(limitStr)
