@@ -39,6 +39,10 @@ func FormatValidationError(err error) map[string]string {
 				out[field] = fmt.Sprintf("%s must be at most %s characters long", field, fe.Param())
 			case "len":
 				out[field] = fmt.Sprintf("%s must be exactly %s characters long", field, fe.Param())
+			case "currency":
+				out[field] = "Currency must be one of: USD, EUR, GBP, NGN, JPY"
+			case "category":
+				out[field] = "Category must be one of: travel, meals, office, supplies"
 			default:
 				out[field] = fmt.Sprintf("%s is not valid (%s)", field, fe.Tag())
 			}

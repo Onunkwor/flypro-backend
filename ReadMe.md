@@ -1,4 +1,4 @@
-<!-- # FlyPro Backend API
+# FlyPro Backend API
 
 ## 📌 Overview
 
@@ -9,7 +9,7 @@ This project is a backend API for Travel Expense Management, built for the FlyPr
 - Currency conversion integration with USD normalization
 - Redis caching for performance
 - Goose for database migrations
-- Unit testing with mocks
+- testing with mocks
 
 ## 🏗 Project Structure
 
@@ -26,7 +26,6 @@ internal/
 ├── middleware/             # Logging, CORS, rate limiting
 └── utils/                  # Helpers (error formatting, etc.)
 migrations/                 # Goose migration files
-tests/                      # Unit tests
 docker-compose.yml          # Postgres + Redis setup
 Makefile                    # Migration & test commands
 .env                        # Environment variables
@@ -47,11 +46,16 @@ go mod tidy
 Create a `.env` file in the project root:
 
 ```
-DB_URL=postgres://[user]:[password]@localhost:5432/flypro?sslmode=disable
-REDIS_ADDR=localhost:6379
+PORT=
+DB_DSN=
+DB_URL=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+REDIS_ADDR=
 REDIS_PASSWORD=
-PORT=8080
-CURRENCY_API_KEY=your_api_key_here
+GIN_MODE=debug
+CURRENCY_API_KEY=
 ```
 
 ### 3. Start Dependencies
@@ -103,6 +107,10 @@ go run ./cmd/server
 - `GET /api/reports` – List reports (pagination)
 - `PUT /api/reports/:id/submit` – Submit report
 
+### Download Postman Collection
+
+[📥 FlyPro Assessment Collection](./postman/flypro-assestment.postman_collection.json)
+
 ## 🔄 Currency Conversion & Caching
 
 - Integrated with a third-party currency API
@@ -126,40 +134,9 @@ Run tests with:
 make test
 ```
 
-## ❓ Design & Scalability Questions
-
-### Concurrent Expense Approvals
-
-- Use row-level locking (Postgres `FOR UPDATE`) or optimistic locking with versioning
-- Prevents race conditions when multiple approvers act on the same report
-
-### Scaling Strategies
-
-- Horizontal scaling with load balancers
-- Read replicas for PostgreSQL
-- Redis caching for hot queries
-
-### Ensuring Data Consistency
-
-- Database transactions for multi-step operations
-- Event-driven architecture (Kafka/RabbitMQ) for eventual consistency if services are decoupled
-
-### Monitoring & Alerting
-
-- Prometheus + Grafana for metrics (API latency, DB health, Redis hit rate)
-- Alertmanager for error thresholds (e.g., currency API failures)
-- Structured logging with correlation IDs
-
 ## ✅ Submission Deliverables
 
 - Clean Git history & commits
 - Dockerized local setup (Postgres + Redis)
 - Goose migrations with indexes & constraints
 - Postman collection for API testing
-- Seed script with demo data
-
-## 🚀 Bonus Features Implemented
-
-- Structured logging
-- Redis caching for report summaries
-- Graceful error handling with custom errors -->

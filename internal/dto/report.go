@@ -39,7 +39,7 @@ type UserDTO struct {
 type ReportDTO struct {
 	ID        uint         `json:"id"`
 	Title     string       `json:"title"`
-	User      UserDTO      `json:"user"`
+	User      *UserDTO     `json:"user"`
 	Expenses  []ExpenseDTO `json:"expenses"`
 	Total     float64      `json:"total"`
 	CreatedAt time.Time    `json:"created_at"`
@@ -56,8 +56,8 @@ func ToExpenseDTO(e models.Expense) ExpenseDTO {
 	}
 }
 
-func ToUserDTO(u models.User) UserDTO {
-	return UserDTO{
+func ToUserDTO(u models.User) *UserDTO {
+	return &UserDTO{
 		ID:    u.ID,
 		Name:  u.Name,
 		Email: u.Email,
@@ -69,7 +69,7 @@ func ToReportDTO(r models.ExpenseReport) ReportDTO {
 	return ReportDTO{
 		ID:        r.ID,
 		Title:     r.Title,
-		User:      ToUserDTO(r.User),
+		User:      ToUserDTO(*r.User),
 		Expenses:  expenses,
 		Total:     r.Total,
 		CreatedAt: r.CreatedAt,
