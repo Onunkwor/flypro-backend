@@ -63,7 +63,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"user_id\": 1,\r\n  \"amount\": 190,\r\n  \"currency\": \"USD\",\r\n  \"category\": \"Travel\",\r\n  \"description\": \"Flight to Jamaica\"\r\n}"
+					"raw": "{\r\n  \"user_id\": 1,\r\n  \"amount\": 300,\r\n  \"currency\": \"NGN\",\r\n  \"category\": \"travel\",\r\n  \"description\": \"Flight to Europe\"\r\n}"
 				},
 				"url": {
 					"raw": "http://localhost:4000/api/expenses",
@@ -154,7 +154,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"user_id\": 1, \r\n  \"amount\": 140,\r\n  \"currency\": \"USD\",\r\n  \"category\": \"Travel\",\r\n  \"description\": \"Flight to Nigeria\"\r\n}"
+					"raw": "{\r\n  \"user_id\": 1, \r\n  \"amount\": 140,\r\n  \"currency\": \"EUR\",\r\n  \"category\": \"Meals\",\r\n  \"description\": \"Dinner at McDonald's\"\r\n}"
 				},
 				"url": {
 					"raw": "http://localhost:4000/api/expenses/1",
@@ -283,7 +283,7 @@
 		{
 			"name": "submit-report",
 			"request": {
-				"method": "POST",
+				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
