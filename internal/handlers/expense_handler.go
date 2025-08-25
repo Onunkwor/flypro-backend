@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -22,7 +21,6 @@ func NewExpenseHandler(svc *services.ExpenseService) *ExpenseHandler {
 	return &ExpenseHandler{svc: svc}
 }
 
-// POST /api/expenses
 func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 	var req dto.CreateExpenseRequest
 
@@ -56,9 +54,15 @@ func (h *ExpenseHandler) GetExpenseByID(c *gin.Context) {
 		return
 	}
 
-	userID := c.Query("user_id")
-	if userID == "" {
+	userIDParam := c.Query("user_id")
+	if userIDParam == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil || userID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
 		return
 	}
 
@@ -72,7 +76,7 @@ func (h *ExpenseHandler) GetExpenseByID(c *gin.Context) {
 		return
 	}
 
-	if fmt.Sprintf("%d", expense.UserID) != userID {
+	if expense.UserID != uint(userID) {
 		utils.ForbiddenResponse(c, "not authorized to access this expense")
 		return
 	}
